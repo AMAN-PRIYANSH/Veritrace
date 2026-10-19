@@ -18,6 +18,39 @@ PostgreSQL is the source of truth. Neo4j and Qdrant are projections of it, writt
 
 ---
 
+## Run with Docker (recommended, one click)
+
+Needs only **Docker Desktop**. PostgreSQL, Neo4j, Qdrant and the Next.js app each run in their own container; nothing else is installed on your computer.
+
+| To | Windows | macOS / Linux |
+|---|---|---|
+| Start everything and open the site | double-click `start.bat` | `./start.sh` |
+| Stop everything (data is kept, Docker Desktop quits) | double-click `stop.bat` | `./stop.sh` |
+| Run the checks (typecheck, 43 tests, SQL vs Cypher) | double-click `check.bat` | `docker compose --env-file .env.docker exec app npm test` |
+| Wipe all data and rebuild the demo data on the next start | double-click `reset.bat` | `docker compose --env-file .env.docker down -v` |
+
+What `start.bat` does:
+
+1. Starts Docker Desktop if it is not running.
+2. On the first run, creates `.env.docker` with random passwords (git-ignored) and writes the logins to `LOGIN-INFO.txt` (also git-ignored).
+3. Runs `docker compose up`. The app container installs packages, runs `npm run setup` on the first start only, runs the checks into `logs/checks.log`, then starts `npm run dev`.
+4. Waits until http://localhost:3000 answers and opens it in your browser.
+
+The first start downloads about 1.5 GB (images, npm packages, the embedding model) and takes 10 to 20 minutes. Later starts take under a minute.
+
+| Service | Address on your computer |
+|---|---|
+| Website | http://localhost:3000 |
+| Neo4j Browser | http://localhost:7474 |
+| Qdrant dashboard | http://localhost:6333/dashboard |
+| PostgreSQL (pgAdmin, psql) | `localhost:5433`, database and user `veritrace` |
+
+Logs are in `logs/`: `app.log` (progress), `setup.log`, `checks.log`, `npm-install.log`. Any npm script can run inside the container, for example `docker compose --env-file .env.docker exec app npm run db:queries` (the container has `psql`).
+
+---
+
+## Run without Docker
+
 ## Requirements
 
 | Tool | Version | Notes |

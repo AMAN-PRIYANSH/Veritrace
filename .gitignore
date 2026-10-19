@@ -21,3 +21,7 @@ next-env.d.ts
 # local working notes, not part of the submission
 commits.md
 *.pdf
+
+# Docker run: generated logins and logs (passwords live in .env.docker, also ignored)
+LOGIN-INFO.txt
+logs/
