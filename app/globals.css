@@ -146,6 +146,14 @@ code {
   white-space: nowrap;
   min-width: 0;
 }
+/* long free text in table cells: two lines, full text on hover (title) */
+.clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
 
 /* small caps section label: 11px / 700 / tracked */
 .label {

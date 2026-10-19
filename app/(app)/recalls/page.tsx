@@ -298,7 +298,11 @@ function RecallRow({ r, canClose, onChanged }: { r: Recall; canClose: boolean; o
             {r.product_name}
           </div>
         </td>
-        <td style={{ maxWidth: 360 }}>{r.reason}</td>
+        <td style={{ minWidth: 180, maxWidth: 360 }}>
+          <div className="clamp-2" title={r.reason}>
+            {r.reason}
+          </div>
+        </td>
         <td className="right num">{r.batches_in_scope}</td>
         <td className="right num">{r.outlets_exposed}</td>
         <td className="right num">{fmtNum(r.units_quarantined)}</td>
