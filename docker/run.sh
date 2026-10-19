@@ -39,5 +39,11 @@ if [ ! -f .cache/.setup-done ]; then
   log "checks finished, see logs/checks.log"
 fi
 
+# Start from an empty .next every time. After a container restart, Turbopack's
+# saved dev cache answered every nested route (/api/batches/58/provenance,
+# /exposure, /compare) with 404 even though the files were there; clearing it
+# fixed that. The cost is a few seconds of compiling on the first page view.
+rm -rf .next/* .next/.[!.]* 2>/dev/null || true
+
 log "website starting on http://localhost:3000"
 exec npm run dev -- -H 0.0.0.0 -p 3000
