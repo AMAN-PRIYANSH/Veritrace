@@ -4,7 +4,7 @@ Four kinds of evidence, each reproducible with one command.
 
 | What | Command | Result |
 |---|---|---|
-| 42 database and API test cases | `npm test` | 42 / 42 pass |
+| 43 database and API test cases | `npm test` | 43 / 43 pass |
 | SQL and Cypher agree for every batch | `npm run graph:verify` | 66 / 66 batches identical |
 | Paraphrased complaints matched by meaning | `npm run complaints:seed` | 8 / 8 by vector search, 3 / 8 by keyword search |
 | Index speed-up at scale | `npm run bench:indexes` | 84× to 440× faster; `docs/indexing-evidence.md` |
@@ -21,6 +21,7 @@ Written with Node's built-in test runner (`node:test`). Every database test runs
 | TC-02 | plain-text password | 23514 `chk_user_password_is_bcrypt` | pass |
 | TC-03 | zero or negative quantity | 23514 `chk_batch_qty` | pass |
 | TC-04 | manufacture date in the future | 23514 `chk_batch_date` | pass |
+| TC-04b | batch dated today in India while UTC is still on yesterday | accepted; database time zone is Asia/Kolkata | pass |
 | TC-05 | malformed batch code | 23514 `chk_batch_code_format` | pass |
 | TC-06 | duplicate batch code | 23505 unique violation | pass |
 | TC-07 | batch as its own input | P0001 from the cycle trigger; with the trigger disabled, 23514 `chk_bc_no_self_loop` | pass |

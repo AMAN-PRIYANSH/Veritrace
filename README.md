@@ -82,7 +82,7 @@ Sign in as **maker** (manufacturer) or **inspector** (regulator) with the passwo
 ## Verify
 
 ```bash
-npm test               # 42 database and API test cases (each runs in a rolled-back transaction)
+npm test               # 43 database and API test cases (each runs in a rolled-back transaction)
 npm run graph:verify   # recursive CTE vs Cypher, for every batch: results must be identical
 npm run db:queries     # the requirement 6 query set, printed from psql
 npm run bench:indexes  # EXPLAIN ANALYZE before/after indexes on 200k rows -> docs/indexing-evidence.md

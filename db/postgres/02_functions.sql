@@ -12,6 +12,29 @@
 
 
 /* =========================================================
+   0. BUSINESS TIME ZONE
+   chk_batch_date and chk_shipment_date compare with
+   CURRENT_DATE, and CURRENT_DATE follows the session time
+   zone. The screens fill in the user's local (India) date, so
+   a server running in UTC (Docker, any cloud database)
+   refused "today" as a future date between 00:00 and 05:30
+   IST. Every outlet is in India, so the database itself is
+   pinned to Asia/Kolkata. New connections pick it up; the SET
+   covers the rest of this script's own session.
+   ========================================================= */
+DO $$
+BEGIN
+    EXECUTE format('ALTER DATABASE %I SET timezone TO %L',
+                   current_database(), 'Asia/Kolkata');
+EXCEPTION WHEN insufficient_privilege THEN
+    RAISE NOTICE 'Not the database owner: set timezone = ''Asia/Kolkata'' in postgresql.conf instead';
+END
+$$;
+
+SET timezone TO 'Asia/Kolkata';
+
+
+/* =========================================================
    A. SCHEMA EVOLUTION  (requirement 5: ALTER)
    The first version of complaint stored only the matched
    batch. Keeping the score lets a regulator judge how

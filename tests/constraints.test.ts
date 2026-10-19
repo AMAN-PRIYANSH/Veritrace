@@ -37,6 +37,15 @@ describe("CHECK constraints and keys", () => {
       await rejects(f, () => f.batch("FUT", { date: "2099-01-01" }), { code: "23514", constraint: "chk_batch_date" });
     }));
 
+  test("TC-04b today's date in India is accepted, even while UTC is still on yesterday", () =>
+    inRollback(async (f) => {
+      const tz = await f.one<{ tz: string }>(`SELECT current_setting('TimeZone') AS tz`);
+      assert.equal(tz.tz, "Asia/Kolkata");
+      const todayInIndia = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());
+      const id = await f.batch("TODAY", { date: todayInIndia });
+      assert.ok(id > 0);
+    }));
+
   test("TC-05 a lowercase or malformed batch code is rejected", () =>
     inRollback(async (f) => {
       await rejects(
