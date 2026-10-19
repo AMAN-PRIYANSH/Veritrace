@@ -283,6 +283,7 @@ function Trace({
                 edges={exposure.data.edges}
                 outlets={exposure.data.outlets}
                 direction="forward"
+                onBatchClick={(id) => onBatch(id)}
               />
             </div>
           ) : provenance.data ? (
@@ -294,7 +295,13 @@ function Trace({
               {provenance.data.upstream.length === 0 ? (
                 <Empty title="A raw material lot">Nothing went into this batch.</Empty>
               ) : (
-                <LineageGraph source={provenance.data.source} nodes={provenance.data.upstream} edges={provenance.data.edges} direction="backward" />
+                <LineageGraph
+                  source={provenance.data.source}
+                  nodes={provenance.data.upstream}
+                  edges={provenance.data.edges}
+                  direction="backward"
+                  onBatchClick={(id) => onBatch(id)}
+                />
               )}
             </div>
           ) : null}

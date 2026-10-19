@@ -32,6 +32,7 @@ interface Placed {
   y: number;
   status?: LineageNode["status"];
   source?: boolean;
+  batchId?: number;
 }
 
 const short = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
@@ -42,12 +43,15 @@ export function LineageGraph({
   edges,
   outlets = [],
   direction,
+  onBatchClick,
 }: {
   source: LineageNode;
   nodes: LineageNode[];
   edges: LineageEdge[];
   outlets?: ExposureRow[];
   direction: "forward" | "backward";
+  /** when given, clicking a batch node (other than the source) re-traces from that batch */
+  onBatchClick?: (batchId: number) => void;
 }) {
   const [hover, setHover] = useState<string | null>(null);
   const wrap = useRef<HTMLDivElement>(null);
@@ -110,6 +114,7 @@ export function LineageGraph({
           y: yFor(i, list.length),
           status: n.status,
           source: n.batchId === source.batchId,
+          batchId: n.batchId,
         }),
       );
     }
@@ -209,6 +214,10 @@ export function LineageGraph({
                     : "#d9d1f3";
             const fill = p.source ? "#efe7fe" : p.kind === "outlet" ? "#f6f3ff" : "#ffffff";
             const statusText = p.status === "RECALLED" ? " · recalled" : p.status === "QUARANTINED" ? " · on hold" : "";
+            const clickable = onBatchClick !== undefined && p.kind === "batch" && !p.source && p.batchId !== undefined;
+            const open = () => {
+              if (clickable) onBatchClick(p.batchId!);
+            };
             return (
               <g
                 key={p.key}
@@ -216,9 +225,13 @@ export function LineageGraph({
                 opacity={linked(p.key) ? 1 : 0.35}
                 onMouseEnter={() => setHover(p.key)}
                 onMouseLeave={() => setHover(null)}
-                style={{ cursor: "default" }}
+                onClick={clickable ? open : undefined}
+                onKeyDown={clickable ? (e) => (e.key === "Enter" || e.key === " ") && open() : undefined}
+                role={clickable ? "button" : undefined}
+                tabIndex={clickable ? 0 : undefined}
+                style={{ cursor: clickable ? "pointer" : "default" }}
               >
-                <title>{`${p.label} · ${p.sub}${statusText}`}</title>
+                <title>{`${p.label} · ${p.sub}${statusText}${clickable ? " · click to trace from here" : ""}`}</title>
                 <rect width={NODE_W} height={p.h} rx={9} fill={fill} stroke={stroke} strokeWidth={p.source || p.status === "RECALLED" ? 1.8 : 1.2} strokeDasharray={p.kind === "outlet" ? "4 3" : undefined} />
                 <text x={10} y={p.kind === "batch" ? 16 : 13.5} fontSize={p.kind === "batch" ? 11.5 : 10.5} fontWeight={700} fill="#211d3d" fontFamily={p.kind === "batch" ? "ui-monospace, SFMono-Regular, Menlo, monospace" : undefined}>
                   {short(p.label, p.kind === "batch" ? 19 : 24)}
@@ -246,7 +259,10 @@ export function LineageGraph({
             <i style={{ borderColor: "#c9bff0", borderStyle: "dashed", background: "#f6f3ff" }} /> outlet
           </span>
         )}
-        <span>columns = WENT_INTO hops · hover a node to trace it</span>
+        <span>
+          columns = WENT_INTO hops · hover a node to light up its links
+          {onBatchClick ? " · click a batch to trace from it" : ""}
+        </span>
       </div>
     </>
   );

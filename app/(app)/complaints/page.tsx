@@ -105,11 +105,16 @@ function Complaints({ isRegulator }: { isRegulator: boolean }) {
                         <td style={{ maxWidth: 420 }}>{c.complaint_text}</td>
                         <td>{c.outlet_name ?? <span className="faint">not given</span>}</td>
                         <td>
-                          {c.matched_batch_code ? (
+                          {c.matched_batch_code && c.matched_batch_id ? (
                             <>
-                              <span className="mono" style={{ fontWeight: 650 }}>
+                              <Link
+                                className="mono"
+                                style={{ fontWeight: 650 }}
+                                href={`/exposure?tab=trace&batch=${c.matched_batch_id}&dir=backward`}
+                                title={`Trace what went into ${c.matched_batch_code}`}
+                              >
                                 {c.matched_batch_code}
-                              </span>
+                              </Link>
                               <div className="muted" style={{ fontSize: 12 }}>
                                 {c.matched_product}
                               </div>
