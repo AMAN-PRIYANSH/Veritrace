@@ -19,7 +19,9 @@ if (Test-Path ".env.docker") {
 Write-Host "==> Quitting Docker Desktop" -ForegroundColor Cyan
 cmd /c "docker desktop stop >nul 2>&1"
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Could not quit Docker Desktop automatically. Right-click the whale icon in the taskbar and choose Quit."
+    Write-Host "Veritrace is stopped, but Docker Desktop could not be quit automatically." -ForegroundColor Yellow
+    Write-Host "Right-click the whale icon in the taskbar and choose Quit."
+    exit 2  # keeps the window open so this message can be read
 } else {
     Write-Host "Docker Desktop stopped."
 }
