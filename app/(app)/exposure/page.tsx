@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { BatchSelect, useBatchOptions } from "@/components/BatchLines";
@@ -57,7 +58,9 @@ function Exposure() {
         />
       </div>
       {tab === "overview" && <Overview />}
-      {tab === "trace" && <Trace batch={batch} onBatch={(b) => go({ batch: b })} />}
+      {tab === "trace" && (
+        <Trace batch={batch} onBatch={(b) => go({ batch: b })} initialDirection={params.get("dir") === "backward" ? "backward" : "forward"} />
+      )}
       {tab === "compare" && <Compare batch={batch} onBatch={(b) => go({ batch: b })} />}
       {tab === "reports" && <Reports />}
     </>
@@ -221,9 +224,18 @@ function Overview() {
 
 /* ---------- trace: forward exposure / backward provenance ---------- */
 
-function Trace({ batch, onBatch }: { batch: number | ""; onBatch: (b: number | "") => void }) {
+function Trace({
+  batch,
+  onBatch,
+  initialDirection = "forward",
+}: {
+  batch: number | "";
+  onBatch: (b: number | "") => void;
+  /** from ?dir=backward, so other screens can link straight to a provenance trace */
+  initialDirection?: "forward" | "backward";
+}) {
   const options = useBatchOptions(false);
-  const [direction, setDirection] = useState<"forward" | "backward">("forward");
+  const [direction, setDirection] = useState<"forward" | "backward">(initialDirection);
   const exposure = useApi<ExposureReport>(batch && direction === "forward" ? `/api/batches/${batch}/exposure` : null);
   const provenance = useApi<ProvenanceReport>(batch && direction === "backward" ? `/api/batches/${batch}/provenance` : null);
   const active = direction === "forward" ? exposure : provenance;
@@ -245,6 +257,11 @@ function Trace({ batch, onBatch }: { batch: number | ""; onBatch: (b: number | "
                 { value: "backward", label: "Backward: what went in" },
               ]}
             />
+            {batch && (
+              <Link className="btn" href={`/recalls?batch=${batch}`} title="Preview and confirm a recall of this batch">
+                Recall this batch
+              </Link>
+            )}
           </div>
         </div>
         <div className="card-body">

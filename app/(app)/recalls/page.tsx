@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "@/components/AppShell";
 import { BatchSelect, useBatchOptions } from "@/components/BatchLines";
 import { Icon } from "@/components/Icon";
@@ -70,6 +70,13 @@ function InitiateRecall({ onDone }: { onDone: () => void }) {
       setBusy(false);
     }
   }
+
+  // /recalls?batch=ID (the "Recall this batch" link on the Trace tab) opens
+  // straight on that batch's exposure preview. Nothing changes until confirmed.
+  useEffect(() => {
+    const fromLink = Number(new URLSearchParams(window.location.search).get("batch"));
+    if (fromLink) void loadPreview(fromLink);
+  }, []);
 
   async function fire() {
     setBusy(true);

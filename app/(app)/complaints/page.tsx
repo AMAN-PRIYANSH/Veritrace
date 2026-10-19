@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { type FormEvent, useState } from "react";
 import { useSession } from "@/components/AppShell";
 import { Icon } from "@/components/Icon";
@@ -250,6 +251,17 @@ function Analysis({ a }: { a: ComplaintAnalysis & { sync: SyncStatus } }) {
               <span className="label">cosine similarity</span>
               <b>{fmtScore(best.similarity)}</b>
             </div>
+          </div>
+        )}
+
+        {best && a.matched && (
+          <div className="row">
+            <Link className="btn" href={`/exposure?tab=trace&batch=${best.batchId}&dir=backward`}>
+              Trace what went into {best.batchCode}
+            </Link>
+            <Link className="btn" href={`/exposure?tab=trace&batch=${best.batchId}`}>
+              Who else received it
+            </Link>
           </div>
         )}
 
