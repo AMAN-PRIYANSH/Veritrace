@@ -72,7 +72,7 @@ function Complaints({ isRegulator }: { isRegulator: boolean }) {
           <div className="card-head">
             <div>
               <h2>All complaints</h2>
-              <div className="sub">matched_batch_id and similarity_score are written back to PostgreSQL after the Qdrant search.</div>
+              <div className="sub">matched_batch_id and similarity_score are written back to PostgreSQL after the Qdrant search, only when the score reaches the match threshold.</div>
             </div>
           </div>
           <div className="card-body flush">
@@ -218,7 +218,20 @@ function Analysis({ a }: { a: ComplaintAnalysis & { sync: SyncStatus } }) {
       <div className="card-body stack">
         {a.sync.errors.length > 0 && <ErrorBanner error={a.sync.errors.join(" · ")} />}
 
-        {best && (
+        {best && !a.matched && (
+          <div className="banner info">
+            <Icon name="ban" />
+            <div className="body">
+              <span className="title">No confident match, saved as unmatched</span>
+              <span>
+                The closest batch, <span className="mono">{best.batchCode}</span>, scored {fmtScore(best.similarity)}, below the{" "}
+                {fmtScore(a.minSimilarity)} needed to count as a match. A regulator can review it in the list below.
+              </span>
+            </div>
+          </div>
+        )}
+
+        {best && a.matched && (
           <div className="match-card">
             <Icon name="check" size={22} />
             <div>
@@ -259,7 +272,7 @@ function Analysis({ a }: { a: ComplaintAnalysis & { sync: SyncStatus } }) {
                       {m.status !== "ACTIVE" && <StatusPill status={m.status} />}
                     </div>
                     <div className="bar-track">
-                      <div className={`bar-fill${m === best ? "" : " soft"}`} style={{ width: `${Math.max(2, m.similarity * 100)}%` }} />
+                      <div className={`bar-fill${m === best && a.matched ? "" : " soft"}`} style={{ width: `${Math.max(2, m.similarity * 100)}%` }} />
                     </div>
                     <div className="num right">{fmtScore(m.similarity)}</div>
                   </div>

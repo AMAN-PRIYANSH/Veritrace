@@ -195,6 +195,9 @@ export interface ComplaintAnalysis {
   keywordQuery: string;
   similarComplaints: SimilarComplaint[];
   candidateScope: "outlet" | "shipped";
+  /** false when the best candidate scored below minSimilarity (left unmatched) */
+  matched: boolean;
+  minSimilarity: number;
   elapsedMs: { embed: number; search: number };
 }
 

@@ -75,7 +75,7 @@ async function main() {
       complaint: c.text.slice(0, 44) + "…",
       expected: c.expect,
       vector: top ? `${top.batchCode} (${top.similarity.toFixed(3)})` : "-",
-      vectorOk: top?.batchCode.startsWith(c.expect) ? "yes" : "NO",
+      vectorOk: result.matched && top?.batchCode.startsWith(c.expect) ? "yes" : "NO",
       keyword: kw ? kw.batchCode : "nothing",
       keywordOk: kw?.batchCode.startsWith(c.expect) ? "yes" : "no",
     });

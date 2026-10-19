@@ -478,7 +478,7 @@ Qdrant returns cosine **similarity** as the score (higher is closer). The pipeli
 1. Candidates are the batches shipped to the complaint's outlet, or every batch that reached any outlet when the outlet is unknown.
 2. Qdrant searches `batch_descriptions` filtered to those candidates, top 5.
 3. Lots of one product tie (same description); within 0.01 of the best score the lot most recently shipped to that outlet wins.
-4. `matched_batch_id` and `similarity_score` are written back to PostgreSQL.
+4. `matched_batch_id` and `similarity_score` are written back to PostgreSQL, but only when the score is at least `MIN_MATCH_SIMILARITY` (0.20, env `COMPLAINT_MIN_SIMILARITY`). Below it the complaint stays unmatched and the candidates are shown for review. Real complaints in the demo data score 0.23 to 0.53; off-topic text scores at most 0.16.
 5. A PostgreSQL full-text search runs on the same text as the keyword baseline, shown side by side.
 
 The SQL below is the pgvector form this replaced, kept for reference.

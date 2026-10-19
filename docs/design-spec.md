@@ -539,7 +539,7 @@ See `docs/testing.md` for the full table. Summary:
 
 Veritrace uses each database for the kind of data it handles best. PostgreSQL holds every fact and enforces every rule: a recalled batch cannot be shipped, cancelled, reused or un-recalled, no matter which program writes to the table, and the recall itself is one transaction. Neo4j answers the unknown-depth question in one pattern, and the application checks that it agrees with the recursive CTE row for row. Qdrant matches complaints that share no words with the product they describe, which keyword search cannot do at all.
 
-**Limitations.** The sentence model is small (MiniLM): similarity scores are modest (0.25 to 0.45) and it can confuse products whose descriptions are close; the outlet filter does much of the work of narrowing to the right lot. The cross-database writes are not a distributed transaction: PostgreSQL commits first and a failed projection is reported and repaired by resync rather than rolled back. The rate limiter is in memory, so it would need a shared store with more than one server.
+**Limitations.** The sentence model is small (MiniLM): similarity scores are modest (0.25 to 0.45) and it can confuse products whose descriptions are close, so a match is only recorded at 0.20 or above (off-topic text scored at most 0.16) and anything lower stays unmatched for review; the outlet filter does much of the work of narrowing to the right lot. The cross-database writes are not a distributed transaction: PostgreSQL commits first and a failed projection is reported and repaired by resync rather than rolled back. The rate limiter is in memory, so it would need a shared store with more than one server.
 
 **Future enhancements.**
 

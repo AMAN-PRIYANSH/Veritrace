@@ -76,15 +76,20 @@ export async function searchBatches(
   return res.points.map((p) => ({ batchId: Number(p.id), score: p.score }));
 }
 
+export interface ScoredComplaint {
+  complaintId: number;
+  score: number;
+}
+
 export async function searchComplaints(
   vector: number[],
   opts: { excludeId?: number; limit?: number } = {},
-): Promise<ScoredBatch[]> {
+): Promise<ScoredComplaint[]> {
   const res = await qdrant().query(COMPLAINT_COLLECTION, {
     query: vector,
     limit: opts.limit ?? 3,
     with_payload: false,
     filter: opts.excludeId ? { must_not: [{ has_id: [opts.excludeId] }] } : undefined,
   });
-  return res.points.map((p) => ({ batchId: Number(p.id), score: p.score }));
+  return res.points.map((p) => ({ complaintId: Number(p.id), score: p.score }));
 }

@@ -13,7 +13,9 @@ import * as vector from "@/lib/vector";
  *      outlet is unknown, every batch that reached any outlet (a customer
  *      cannot have bought an intermediate that never left the plant)
  *   3. Qdrant cosine search over batch descriptions, filtered to candidates
- *   4. pick the best; write batch and score back to the complaint row
+ *   4. pick the best; write batch and score back to the complaint row, but
+ *      only when the score clears MIN_MATCH_SIMILARITY, otherwise the
+ *      complaint stays unmatched for a regulator to review
  *   5. store the complaint's own vector; find earlier complaints like it
  *   6. the keyword (full-text) baseline, for comparison
  */
@@ -23,12 +25,25 @@ import * as vector from "@/lib/vector";
 // the outlet: semantics finds the product, distribution narrows the lot.
 const TIE_MARGIN = 0.01;
 
+// Below this cosine similarity the "best" batch is a guess, not a match, so it
+// is shown as a candidate but never written to complaint.matched_batch_id.
+// Measured on the demo data (20 Oct 2026): real complaints scored 0.23 to
+// 0.53, off-topic text (a burst tyre, a rude delivery man, a login problem)
+// scored at most 0.16. Override with COMPLAINT_MIN_SIMILARITY.
+export const MIN_MATCH_SIMILARITY = (() => {
+  const v = Number(process.env.COMPLAINT_MIN_SIMILARITY);
+  return Number.isFinite(v) && v > 0 && v < 1 ? v : 0.2;
+})();
+
 export interface MatchResult {
   vectorMatches: VectorMatch[];
   keywordMatches: KeywordMatch[];
   keywordQuery: string;
   similarComplaints: SimilarComplaint[];
   candidateScope: "outlet" | "shipped";
+  /** true when the best candidate cleared minSimilarity and was recorded */
+  matched: boolean;
+  minSimilarity: number;
   elapsedMs: { embed: number; search: number };
   vectorError?: string;
 }
@@ -45,6 +60,8 @@ export async function matchComplaint(c: {
     keywordQuery: keyword.query,
     similarComplaints: [],
     candidateScope: "shipped",
+    matched: false,
+    minSimilarity: MIN_MATCH_SIMILARITY,
     elapsedMs: { embed: 0, search: 0 },
   };
 
@@ -84,23 +101,26 @@ export async function matchComplaint(c: {
         .filter((m) => m.similarity >= top.similarity - TIE_MARGIN && m.productName === top.productName)
         .sort((a, b) => (b.lastShippedToOutlet ?? "").localeCompare(a.lastShippedToOutlet ?? ""))[0]!;
       matches = [best, ...matches.filter((m) => m !== best)];
-      await recordMatch(c.complaintId, best.batchId, best.similarity);
+      if (best.similarity >= MIN_MATCH_SIMILARITY) {
+        await recordMatch(c.complaintId, best.batchId, best.similarity);
+        result.matched = true;
+      }
     }
     result.vectorMatches = matches;
 
     await vector.upsertComplaint(c.complaintId, vec, {
       outlet_id: c.outletId,
-      matched_batch_id: matches[0]?.batchId ?? null,
+      matched_batch_id: result.matched ? (matches[0]?.batchId ?? null) : null,
     });
     const near = await vector.searchComplaints(vec, { excludeId: c.complaintId, limit: 3 });
-    const texts = new Map((await getComplaintsByIds(near.map((n) => n.batchId))).map((x) => [x.complaint_id, x]));
+    const texts = new Map((await getComplaintsByIds(near.map((n) => n.complaintId))).map((x) => [x.complaint_id, x]));
     result.similarComplaints = near
-      .filter((n) => texts.has(n.batchId))
+      .filter((n) => texts.has(n.complaintId))
       .map((n) => ({
-        complaintId: n.batchId,
-        text: texts.get(n.batchId)!.complaint_text,
+        complaintId: n.complaintId,
+        text: texts.get(n.complaintId)!.complaint_text,
         similarity: Math.round(n.score * 1000) / 1000,
-        matchedBatchCode: texts.get(n.batchId)!.matched_batch_code,
+        matchedBatchCode: texts.get(n.complaintId)!.matched_batch_code,
       }));
     result.elapsedMs.search = Math.round(performance.now() - t);
   } catch (err) {
