@@ -5,9 +5,14 @@ Set-Location (Split-Path $PSScriptRoot -Parent)
 $out = "logs\checks-manual.log"
 New-Item -ItemType Directory -Force -Path "logs" | Out-Null
 "Veritrace checks, $(Get-Date)" | Set-Content $out
-foreach ($cmd in @("typecheck", "test", "graph:verify")) {
-    Write-Host "==> npm run $cmd" -ForegroundColor Cyan
-    docker compose --env-file .env.docker exec -T app npm run $cmd 2>&1 | Tee-Object -FilePath $out -Append
+$steps = @(
+    @{ name = "typecheck";                         cmd = @("npm", "run", "typecheck") },
+    @{ name = "tests (own database veritrace_test)"; cmd = @("bash", "docker/test.sh") },
+    @{ name = "graph:verify (SQL vs Cypher)";      cmd = @("npm", "run", "graph:verify") }
+)
+foreach ($s in $steps) {
+    Write-Host "==> $($s.name)" -ForegroundColor Cyan
+    docker compose --env-file .env.docker exec -T app @($s.cmd) 2>&1 | Tee-Object -FilePath $out -Append
     "EXIT $LASTEXITCODE" | Tee-Object -FilePath $out -Append
 }
 Write-Host ""

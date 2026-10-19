@@ -33,7 +33,7 @@ if [ ! -f .cache/.setup-done ]; then
   log "running checks: typecheck, tests, graph:verify"
   {
     echo "=== typecheck ==="; npm run typecheck; echo "EXIT $?"
-    echo "=== test ===";      npm test;          echo "EXIT $?"
+    echo "=== test (own database: veritrace_test) ==="; bash docker/test.sh; echo "EXIT $?"
     echo "=== graph:verify ==="; npm run graph:verify; echo "EXIT $?"
   } > logs/checks.log 2>&1
   log "checks finished, see logs/checks.log"
