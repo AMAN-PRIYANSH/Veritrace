@@ -2,7 +2,7 @@
 
 **Batch provenance and recall cascade engine.**
 DBMS Experiential Learning, Level 3 project, PES University.
-Ashwin C H (PES1UG24AM900) and Aman Priyanch (PES1UG24AM030).
+Ashwin C H (PES1UG24AM900) and Aman Priyansh (PES1UG24AM030).
 
 When a batch of food is found contaminated, Veritrace answers three questions, each with the database built for it:
 

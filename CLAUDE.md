@@ -2,7 +2,7 @@
 
 > Batch Provenance and Recall Cascade Engine
 > DBMS Experiential Learning, Level 3 Project, PES University
-> Ashwin C H (PES1UG24AM900) and Aman Priyanch (PES1UG24AM030)
+> Ashwin C H (PES1UG24AM900) and Aman Priyansh (PES1UG24AM030)
 
 ---
 

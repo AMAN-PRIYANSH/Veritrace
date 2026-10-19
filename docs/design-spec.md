@@ -5,7 +5,7 @@ DBMS Experiential Learning, Level 3 Project
 PES University, Department of CSE (AI and ML)
 Course Instructor: Dr. Nagasundari S
 
-Ashwin C H (PES1UG24AM900) and Aman Priyanch (PES1UG24AM030)
+Ashwin C H (PES1UG24AM900) and Aman Priyansh (PES1UG24AM030)
 
 Version 1.0
 
